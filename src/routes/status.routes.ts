@@ -1,9 +1,11 @@
 import { Router} from 'express';
 import type { Request, Response } from 'express';
+import { handleAnswerResponse } from '../controller/userController.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
 
-const statusRouter = Router();
+const routes = Router();
 
-statusRouter.get('/status', (req: Request, res: Response) => {
+routes.get('/status', (req: Request, res: Response) => {
     return res.json({ 
         status: "online",
         timestamp: new Date(),
@@ -11,4 +13,6 @@ statusRouter.get('/status', (req: Request, res: Response) => {
     });
 });
 
-export default statusRouter;
+routes.post('/answer', authMiddleware, handleAnswerResponse);
+
+export default routes;
