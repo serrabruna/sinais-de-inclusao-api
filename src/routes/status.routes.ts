@@ -2,6 +2,7 @@ import { Router} from 'express';
 import type { Request, Response } from 'express';
 import { handleAnswerResponse } from '../controller/userController.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { login, register } from '../controller/authController.js';
 
 const routes = Router();
 
@@ -12,6 +13,9 @@ routes.get('/status', (req: Request, res: Response) => {
         projeto: "Sinais de Inclusão"
     });
 });
+
+routes.post('/signup', register);
+routes.post('/login', login);
 
 routes.post('/answer', authMiddleware, handleAnswerResponse);
 

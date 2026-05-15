@@ -30,15 +30,15 @@ export class UserService {
         const expectedLevel = Math.floor(newXp / XP_THRESHOLD_PER_LEVEL) + 1;
 
         if (expectedLevel > user.unlocked_level) {
-        newLevel = expectedLevel;
-        levelUp = true;
+            newLevel = expectedLevel;
+            levelUp = true;
         }
-        
+
         await this.userRepository.updateProgress(userId, newXp, newLevel);
         return {
-        currentXp: newXp,
-        unlockedLevel: newLevel,
-        levelUp
+            currentXp: newXp,
+            unlockedLevel: newLevel,
+            levelUp
         };
     }
 }
