@@ -2,6 +2,17 @@ import { supabase } from "../config/supabase.js";
 import type { Category } from "../model/category.js";
 
 export class CategoryRepository {
+  async create(category: Omit<Category, 'id'>): Promise<Category> {
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([category])
+      .select()
+      .single();
+
+    if (error) throw new Error(`Erro ao criar categoria: ${error.message}`);
+    return data as Category;
+  }
+
   async findAll(): Promise<Category[]> {
     const { data, error } = await supabase
       .from("categories")

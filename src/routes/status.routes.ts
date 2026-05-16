@@ -22,6 +22,7 @@ routes.get('/status', (req: Request, res: Response) => {
 routes.post('/signup', register);
 routes.post('/login', login);
 
+routes.post('/categories', categoryController.handleCreateCategory); 
 routes.get('/categories', categoryController.handleListCategories);
 routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
 
