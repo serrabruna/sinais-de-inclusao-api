@@ -36,4 +36,25 @@ export class CategoryRepository {
     if (error) return null;
     return data as Category;
   }
+
+  async update(id: number, category: Partial<Category>): Promise<Category> {
+    const { data, error } = await supabase
+      .from('categories')
+      .update(category)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Erro ao atualizar categoria: ${error.message}`);
+    return data as Category;
+  }
+
+  async delete(id: number): Promise<void> {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw new Error(`Erro ao deletar categoria: ${error.message}`);
+  }
 }

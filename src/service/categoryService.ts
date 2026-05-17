@@ -18,4 +18,32 @@ export class CategoryService {
     async listAll(): Promise<Category[]> {
         return await this.categoryRepository.findAll();
     }
+
+    async getById(id: number): Promise<Category> {
+        if (isNaN(id)) {
+            throw new Error("O ID fornecido deve ser um número válido.");
+        }
+
+        const category = await this.categoryRepository.findById(id);
+        
+        if (!category) {
+            throw new Error("Categoria não encontrada.");
+        }
+
+        return category;
+    }
+
+    async updateCategory(id: number, data: Partial<Category>): Promise<Category> {
+        const exists = await this.categoryRepository.findById(id);
+        if (!exists) throw new Error("Categoria não encontrada.");
+        
+        return await this.categoryRepository.update(id, data);
+    }
+
+    async deleteCategory(id: number): Promise<void> {
+        const exists = await this.categoryRepository.findById(id);
+        if (!exists) throw new Error("Categoria não encontrada.");
+
+        await this.categoryRepository.delete(id);
+    }
 }

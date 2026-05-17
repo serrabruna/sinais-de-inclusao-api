@@ -22,4 +22,37 @@ export class CategoryController {
             return res.status(400).json({ error: error.message });
         }
     }
+
+    async handleGetCategoryById(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+            const category = await categoryService.getById(id);
+            return res.json(category);
+        } catch (error: any) {
+            if (error.message === "Categoria não encontrada.") {
+                return res.status(404).json({ error: error.message });
+            }
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    async handleUpdateCategory(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+            const updatedCategory = await categoryService.updateCategory(id, req.body);
+            return res.json(updatedCategory);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    async handleDeleteCategory(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+            await categoryService.deleteCategory(id);
+            return res.status(204).send(); 
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
 }

@@ -22,9 +22,12 @@ routes.get('/status', (req: Request, res: Response) => {
 routes.post('/signup', register);
 routes.post('/login', login);
 
-routes.post('/categories', categoryController.handleCreateCategory); 
+routes.post('/categories', categoryController.handleCreateCategory);
 routes.get('/categories', categoryController.handleListCategories);
+routes.get('/categories/:id', categoryController.handleGetCategoryById);
 routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
+routes.put('/categories/:id', categoryController.handleUpdateCategory);
+routes.delete('/categories/:id', categoryController.handleDeleteCategory); 
 
 routes.post('/answer', authMiddleware, handleAnswerResponse);
 
