@@ -8,6 +8,32 @@ export class SignService {
         this.signRepository = new SignRepository();
     }
 
+    async createSign(data: Omit<Sign, 'id'>): Promise<Sign> {
+        if (!data.name || !data.category_id || !data.correct_answer || !data.options) {
+        throw new Error("Campos obrigatórios estão faltando.");
+        }
+
+        
+        if (!data.options.includes(data.correct_answer)) {
+        throw new Error("A resposta correta deve ser uma das opções listadas no array.");
+        }
+
+        return await this.signRepository.create(data);
+    }
+
+    async listAllSigns(): Promise<Sign[]> {
+        const signs = await this.signRepository.findAll();
+        return signs.map(sign => {
+            if (sign.options && sign.options.length > 0) {
+            return {
+                ...sign,
+                options: this.shuffleArray([...sign.options])
+            };
+            }
+            return sign;
+        });
+    }
+
     async listCategories() {
         return await this.signRepository.getAllCategories();
     }
@@ -44,5 +70,26 @@ export class SignService {
             }
         }
         return array;
+    }   
+
+    async updateSign(id: number, data: Partial<Sign>): Promise<Sign> {
+        const exists = await this.signRepository.findById(id);
+        if (!exists) throw new Error("Sinal não encontrado.");
+
+        const finalOptions = data.options ?? exists.options;
+        const finalCorrect = data.correct_answer ?? exists.correct_answer;
+        
+        if (!finalOptions.includes(finalCorrect)) {
+        throw new Error("A resposta correta deve ser uma das opções listadas no array.");
+        }
+
+        return await this.signRepository.update(id, data);
+    }
+
+    async deleteSign(id: number): Promise<void> {
+        const exists = await this.signRepository.findById(id);
+        if (!exists) throw new Error("Sinal não encontrado.");
+
+        await this.signRepository.delete(id);
     }
 }

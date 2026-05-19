@@ -29,6 +29,13 @@ routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQues
 routes.put('/categories/:id', categoryController.handleUpdateCategory);
 routes.delete('/categories/:id', categoryController.handleDeleteCategory); 
 
+routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
+
+routes.post('/signs', signController.handleCreateSign);
+routes.get('/signs', signController.handleListAllSigns);
+routes.put('/signs/:id', signController.handleUpdateSign);
+routes.delete('/signs/:id', signController.handleDeleteSign);
+
 routes.post('/answer', authMiddleware, handleAnswerResponse);
 
 export default routes;
