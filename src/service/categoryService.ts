@@ -9,6 +9,10 @@ export class CategoryService {
     }
 
     async createCategory(data: Omit<Category, 'id'>): Promise<Category> {
+        const alreadyExists = await this.categoryRepository.findByName(data.name);
+        if (alreadyExists) {
+            throw new Error("Categoria com este nome já existe.");
+        }
         if (!data.name || !data.description) {
             throw new Error("Nome e descrição são obrigatórios.");
         }

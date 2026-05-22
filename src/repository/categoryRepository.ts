@@ -37,6 +37,17 @@ export class CategoryRepository {
     return data as Category;
   }
 
+  async findByName(name: string): Promise<Category | null> {
+    const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('name', name)
+        .maybeSingle();
+
+    if (error) return null;
+    return data as Category;
+  }
+
   async update(id: number, category: Partial<Category>): Promise<Category> {
     const { data, error } = await supabase
       .from('categories')
