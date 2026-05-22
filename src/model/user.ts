@@ -3,4 +3,5 @@ export interface User {
     name: string;
     current_xp: number;
     unlocked_level: number;
+    role: 'student' | 'admin';
 }

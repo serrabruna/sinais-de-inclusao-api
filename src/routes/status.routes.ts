@@ -6,6 +6,7 @@ import { login, register } from '../controller/authController.js';
 import { SignController } from '../controller/signController.js';
 import { CategoryController } from '../controller/categoryController.js';
 import { FavoriteController } from '../controller/favoriteController.js';
+import { adminMiddleware } from '../middlewares/role.middleware.js';
 
 const categoryController = new CategoryController();
 const signController = new SignController();
@@ -24,19 +25,19 @@ routes.get('/status', (req: Request, res: Response) => {
 routes.post('/signup', register);
 routes.post('/login', login);
 
-routes.post('/categories', categoryController.handleCreateCategory);
+routes.post('/categories', authMiddleware, adminMiddleware, categoryController.handleCreateCategory);
 routes.get('/categories', categoryController.handleListCategories);
 routes.get('/categories/:id', categoryController.handleGetCategoryById);
 routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
-routes.put('/categories/:id', categoryController.handleUpdateCategory);
-routes.delete('/categories/:id', categoryController.handleDeleteCategory); 
+routes.put('/categories/:id', authMiddleware, adminMiddleware, categoryController.handleUpdateCategory);
+routes.delete('/categories/:id', authMiddleware, adminMiddleware, categoryController.handleDeleteCategory);
 
 routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
 
-routes.post('/signs', signController.handleCreateSign);
+routes.post('/signs', authMiddleware, adminMiddleware, signController.handleCreateSign);
 routes.get('/signs', signController.handleListAllSigns);
-routes.put('/signs/:id', signController.handleUpdateSign);
-routes.delete('/signs/:id', signController.handleDeleteSign);
+routes.put('/signs/:id', authMiddleware, adminMiddleware, signController.handleUpdateSign);
+routes.delete('/signs/:id', authMiddleware, adminMiddleware, signController.handleDeleteSign);
 
 routes.post('/answer', authMiddleware, handleAnswerResponse);
 
