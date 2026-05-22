@@ -5,9 +5,11 @@ import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { login, register } from '../controller/authController.js';
 import { SignController } from '../controller/signController.js';
 import { CategoryController } from '../controller/categoryController.js';
+import { FavoriteController } from '../controller/favoriteController.js';
 
 const categoryController = new CategoryController();
 const signController = new SignController();
+const favoriteController = new FavoriteController();
 
 const routes = Router();
 
@@ -37,5 +39,9 @@ routes.put('/signs/:id', signController.handleUpdateSign);
 routes.delete('/signs/:id', signController.handleDeleteSign);
 
 routes.post('/answer', authMiddleware, handleAnswerResponse);
+
+routes.post('/favorites', authMiddleware, favoriteController.handleToggle);
+routes.get('/favorites/me', authMiddleware, favoriteController.handleListMyFavorites);
+
 
 export default routes;
