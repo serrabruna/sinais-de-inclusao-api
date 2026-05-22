@@ -49,6 +49,18 @@ export class SignRepository {
       return data as Sign[];
     }
 
+    async findByNameAndCategory(name: string, categoryId: number): Promise<Sign | null> {
+      const { data, error } = await supabase
+          .from('signs')
+          .select('*')
+          .eq('name', name)
+          .eq('category_id', categoryId)
+          .maybeSingle();
+
+      if (error) return null;
+      return data as Sign;
+    }
+
     async getAllCategories() {
       const { data, error } = await supabase
         .from('categories')

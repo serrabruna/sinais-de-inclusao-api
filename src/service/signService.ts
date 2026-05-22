@@ -10,15 +10,31 @@ export class SignService {
 
     async createSign(data: Omit<Sign, 'id'>): Promise<Sign> {
         if (!data.name || !data.category_id || !data.correct_answer || !data.options) {
-        throw new Error("Campos obrigatórios estão faltando.");
+            throw new Error("Campos obrigatórios estão faltando.");
         }
 
+        const sanitizedName = data.name.trim();
+        if (!sanitizedName) {
+            throw new Error("O nome do sinal não pode ser composto apenas por espaços.");
+        }
         
-        if (!data.options.includes(data.correct_answer)) {
-        throw new Error("A resposta correta deve ser uma das opções listadas no array.");
+        const alreadyExists = await this.signRepository.findByNameAndCategory(
+            sanitizedName, 
+            data.category_id
+        );
+
+        if (alreadyExists) {
+            throw new Error("Este sinal já está cadastrado nesta categoria.");
         }
 
-        return await this.signRepository.create(data);
+        if (!data.options.includes(data.correct_answer)) {
+            throw new Error("A resposta correta deve ser uma das opções fornecidas.");
+        }
+
+        return await this.signRepository.create({
+            ...data,
+            name: sanitizedName
+        });
     }
 
     async listAllSigns(): Promise<Sign[]> {

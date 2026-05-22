@@ -9,14 +9,24 @@ export class CategoryService {
     }
 
     async createCategory(data: Omit<Category, 'id'>): Promise<Category> {
-        const alreadyExists = await this.categoryRepository.findByName(data.name);
-        if (alreadyExists) {
-            throw new Error("Categoria com este nome já existe.");
-        }
         if (!data.name || !data.description) {
             throw new Error("Nome e descrição são obrigatórios.");
         }
-        return await this.categoryRepository.create(data);
+
+        const sanitizedName = data.name.trim();
+        if (!sanitizedName) {
+            throw new Error("O nome da categoria não pode ser vazio.");
+        }
+
+        const alreadyExists = await this.categoryRepository.findByName(sanitizedName);
+        if (alreadyExists) {
+            throw new Error("Categoria com este nome já existe.");
+        }
+
+        return await this.categoryRepository.create({
+            ...data,
+            name: sanitizedName
+        });
     }
 
     async listAll(): Promise<Category[]> {
