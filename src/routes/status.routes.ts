@@ -1,4 +1,4 @@
-import { Router} from 'express';
+import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { handleAnswerResponse } from '../controller/userController.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
@@ -25,17 +25,18 @@ routes.get('/status', (req: Request, res: Response) => {
 routes.post('/signup', register);
 routes.post('/login', login);
 
+routes.get('/categories', authMiddleware, categoryController.handleListCategories);
+routes.get('/categories/:id', authMiddleware, categoryController.handleGetCategoryById);
+
 routes.post('/categories', authMiddleware, adminMiddleware, categoryController.handleCreateCategory);
-routes.get('/categories', categoryController.handleListCategories);
-routes.get('/categories/:id', categoryController.handleGetCategoryById);
-routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
 routes.put('/categories/:id', authMiddleware, adminMiddleware, categoryController.handleUpdateCategory);
 routes.delete('/categories/:id', authMiddleware, adminMiddleware, categoryController.handleDeleteCategory);
 
-routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions);
+routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQuestions); 
+
+routes.get('/signs', authMiddleware, signController.handleListAllSigns);
 
 routes.post('/signs', authMiddleware, adminMiddleware, signController.handleCreateSign);
-routes.get('/signs', signController.handleListAllSigns);
 routes.put('/signs/:id', authMiddleware, adminMiddleware, signController.handleUpdateSign);
 routes.delete('/signs/:id', authMiddleware, adminMiddleware, signController.handleDeleteSign);
 
@@ -43,6 +44,5 @@ routes.post('/answer', authMiddleware, handleAnswerResponse);
 
 routes.post('/favorites', authMiddleware, favoriteController.handleToggle);
 routes.get('/favorites/me', authMiddleware, favoriteController.handleListMyFavorites);
-
 
 export default routes;

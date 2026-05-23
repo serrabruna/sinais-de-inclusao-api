@@ -1,0 +1,254 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sinais de Inclusão API",
+    "version": "1.0.0",
+    "description": "API para o aplicativo educacional de Libras e inclusão digital."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor Local"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/status": {
+      "get": {
+        "summary": "Verifica o status do servidor",
+        "tags": ["Sistema"],
+        "responses": {
+          "200": {
+            "description": "Servidor online."
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "summary": "Cadastra um novo usuário",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Bruna" },
+                  "email": { "type": "string", "example": "bruna@email.com" },
+                  "password": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuário criado." }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Autentica o usuário",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "bruna@email.com" },
+                  "password": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Token retornado." }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "Lista todas as categorias (App)",
+        "tags": ["Categorias"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "Sucesso" } }
+      },
+      "post": {
+        "summary": "Cria uma nova categoria (Admin)",
+        "tags": ["Categorias"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Saudações" },
+                  "description": { "type": "string", "example": "Sinais do dia a dia" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Criado" } }
+      }
+    },
+    "/categories/{id}": {
+      "get": {
+        "summary": "Busca uma categoria por ID",
+        "tags": ["Categorias"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Sucesso" } }
+      },
+      "put": {
+        "summary": "Atualiza uma categoria (Admin)",
+        "tags": ["Categorias"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Atualizado" } }
+      },
+      "delete": {
+        "summary": "Deleta uma categoria (Admin)",
+        "tags": ["Categorias"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "204": { "description": "Deletado" } }
+      }
+    },
+    "/categories/{id}/signs": {
+      "get": {
+        "summary": "Carrega o Quiz de sinais de uma categoria",
+        "tags": ["Sinais"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Lista de questões/sinais" } }
+      }
+    },
+    "/signs": {
+      "get": {
+        "summary": "Lista todos os sinais gerais",
+        "tags": ["Sinais"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "Sucesso" } }
+      },
+      "post": {
+        "summary": "Cadastra um novo sinal/pergunta (Admin)",
+        "tags": ["Sinais"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Bom dia" },
+                  "category_id": { "type": "integer", "example": 1 },
+                  "correct_answer": { "type": "string", "example": "Bom dia" },
+                  "options": { "type": "array", "items": { "type": "string" }, "example": ["Oi", "Bom dia", "Tchau", "Por favor"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Criado" } }
+      }
+    },
+    "/signs/{id}": {
+      "put": {
+        "summary": "Atualiza um sinal existente (Admin)",
+        "tags": ["Sinais"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Atualizado" } }
+      },
+      "delete": {
+        "summary": "Deleta um sinal do sistema (Admin)",
+        "tags": ["Sinais"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "204": { "description": "Deletado" } }
+      }
+    },
+    "/answer": {
+      "post": {
+        "summary": "Processa a resposta enviada pelo aluno (Gameficação)",
+        "tags": ["Gameficação"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sign_id": { "type": "integer", "example": 2 },
+                  "user_answer": { "type": "string", "example": "Bom dia" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Resposta processada computando XP/Pontos" } }
+      }
+    },
+    "/favorites": {
+      "post": {
+        "summary": "Favorita ou desfavorita um sinal (Toggle)",
+        "tags": ["Favoritos"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signId": { "type": "integer", "example": 4 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Favoritado/Desfavoritado com sucesso" } }
+      }
+    },
+    "/favorites/me": {
+      "get": {
+        "summary": "Lista os sinais favoritados pelo aluno logado",
+        "tags": ["Favoritos"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "Lista de favoritos retornada" } }
+      }
+    }
+  }
+}

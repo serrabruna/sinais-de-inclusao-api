@@ -1,19 +1,17 @@
 import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import statusRouter from './routes/status.routes.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 import routes from './routes/status.routes.js';
 
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(cors()); 
-app.use(express.json()); 
+app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(routes);
 
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando com sucesso em http://localhost:${PORT}`);
+app.listen(3000, () => {
+    console.log('Servidor rodando em http://localhost:3000');
+    console.log('Documentação Swagger disponível em http://localhost:3000/api-docs');
 });

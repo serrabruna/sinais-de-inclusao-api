@@ -1,8 +1,16 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+declare module 'express-serve-static-core' {
+    interface Request {
+        userId?: string;
+        userRole?: string;
+    }
+}
+
 interface TokenPayload {
     sub: string; 
+    role: string; 
 }
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -12,17 +20,25 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
         return res.status(401).json({ error: "Token não fornecido" });
     }
 
-    const [, token] = authHeader.split(' ');
-    try {
-    const secret = process.env.JWT_SECRET;
+    
+    
+    const parts = authHeader.split(' ');
 
-    if (!secret) {
-        throw new Error("JWT_SECRET não configurado no .env");
+    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+        return res.status(401).json({ error: "Token malformado" });
     }
 
-    const decoded = jwt.verify(token as string, secret) as TokenPayload;
-    req.userId = decoded.sub;
-    return next();
+    const token = parts[1];
+
+    try {
+        const secret = process.env.JWT_SECRET;
+
+        if (!secret) {
+            throw new Error("JWT_SECRET não configurado no .env");
+        }
+
+        const decoded = jwt.verify(token as string, secret as string) as any as TokenPayload;        req.userRole = decoded.role; 
+        return next();
     } catch (err) {
         return res.status(401).json({ error: "Token inválido ou expirado" });
     }
