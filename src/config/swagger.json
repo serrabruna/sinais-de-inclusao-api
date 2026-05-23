@@ -45,7 +45,8 @@
                 "properties": {
                   "name": { "type": "string", "example": "Bruna" },
                   "email": { "type": "string", "example": "bruna@email.com" },
-                  "password": { "type": "string", "example": "123456" }
+                  "password": { "type": "string", "example": "123456" },
+                  "role": { "type": "string", "example": "admin" }
                 }
               }
             }

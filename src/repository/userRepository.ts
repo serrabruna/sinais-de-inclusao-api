@@ -15,10 +15,11 @@ export class UserRepository {
     }
 
 
-    async createProfile(id: string, name: string): Promise<User | null> {
+    async createProfile(id: string, name: string, role: string = 'student'): Promise<User | null> {
         const { data, error } = await supabase
         .from('profiles')
-        .insert([{ id, name, current_xp: 0, unlocked_level: 1, role: 'student' }])        .select()
+        .insert([{ id, name, current_xp: 0, unlocked_level: 1, role }])        
+        .select()
         .single();
 
         if (error) throw new Error(`Erro ao criar perfil: ${error.message}`);

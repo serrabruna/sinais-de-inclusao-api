@@ -9,7 +9,7 @@ export class AuthService {
         this.userRepository = new UserRepository();
     }
 
-    async signUp(email: string, password: string, name: string) {
+    async signUp(email: string, password: string, name: string, role: string = 'student') {
         const { data, error } = await supabase.auth.signUp({
             email: email.trim().toLowerCase(),
             password,
@@ -18,14 +18,13 @@ export class AuthService {
         if (error) throw new Error(error.message);
         if (!data.user) throw new Error('Erro ao criar usuário.');
 
-        await this.userRepository.createProfile(data.user.id, name);
+        await this.userRepository.createProfile(data.user.id, name, role);
 
         return { id: data.user.id, email: data.user.email };
     }
 
     async signIn(email: string, password: string) {
         try {
-            
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email.trim().toLowerCase(),
                 password,
@@ -34,8 +33,6 @@ export class AuthService {
             if (error) throw new Error(error.message);
             if (!data.user) throw new Error("Usuário não encontrado ou credenciais inválidas.");
 
-            
-            
             const { data: profile, error: profileError } = await supabase
                 .from('profiles') 
                 .select('role, name')
@@ -45,8 +42,6 @@ export class AuthService {
             if (profileError || !profile) {
                 throw new Error("Perfil do usuário não encontrado no sistema.");
             }
-
-            
             const token = jwt.sign(
                 { 
                     sub: data.user.id, 
@@ -55,8 +50,6 @@ export class AuthService {
                 process.env.JWT_SECRET as string, 
                 { expiresIn: '1d' }
             );
-
-            
             return {
                 id: data.user.id,
                 email: data.user.email,
