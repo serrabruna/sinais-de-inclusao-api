@@ -2,16 +2,33 @@ import { supabase } from "../config/supabase.js";
 import type { Category } from "../model/category.js";
 
 export class CategoryRepository {
-  async create(category: Omit<Category, 'id'>): Promise<Category> {
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([category])
-      .select()
-      .single();
+  async create(name: string, description: string): Promise<Category> {
+        const { count, error: countError } = await supabase
+            .from('categories')
+            .select('*', { count: 'exact', head: true });
 
-    if (error) throw new Error(`Erro ao criar categoria: ${error.message}`);
-    return data as Category;
-  }
+        if (countError) throw new Error(`Erro ao calcular ordem: ${countError.message}`);
+
+        const nextOrder = (count || 0) + 1; 
+
+        const { data, error } = await supabase
+            .from('categories')
+            .insert([
+                { 
+                    name, 
+                    description, 
+                    order: nextOrder 
+                }
+            ])
+            .select()
+            .single();
+
+        if (error) {
+            throw new Error(`Erro ao criar categoria: ${error.message}`);
+        }
+
+        return data as Category;
+    }
 
   async findAll(): Promise<Category[]> {
     const { data, error } = await supabase
