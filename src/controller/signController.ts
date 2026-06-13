@@ -12,7 +12,6 @@ export class SignController {
                     error: "Os campos 'categoryId', 'name', 'statement', 'correctAnswer' e 'options' são obrigatórios." 
                 });
             }
-
             const newSign = await signService.createSign({
                 categoryId: Number(categoryId),
                 name,
@@ -53,6 +52,7 @@ export class SignController {
     async handleUpdateSign(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
+            if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
             const updatedSign = await signService.updateSign(id, req.body);
             return res.json(updatedSign);
         } catch (error: any) {
@@ -63,6 +63,7 @@ export class SignController {
     async handleDeleteSign(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
+            if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
             await signService.deleteSign(id);
             return res.status(204).send();
         } catch (error: any) {

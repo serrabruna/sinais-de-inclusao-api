@@ -100,25 +100,30 @@ export class SignService {
         return array;
     }   
 
-    async updateSign(id: number, data: Partial<Sign>): Promise<Sign> {
+    async updateSign(id: number, data: Partial<Sign> & { 
+        categoryId?: number, 
+        imagePath?: string, 
+        correctAnswer?: string 
+    }): Promise<Sign> {
         const exists = await this.signRepository.findById(id);
         if (!exists) throw new Error("Sinal não encontrado.");
 
-        const updates: Partial<Sign> = {};
-
-        if (data.name !== undefined) updates.name = data.name;
-        if (data.statement !== undefined) updates.statement = data.statement;
-        if (data.image_path !== undefined) updates.image_path = data.image_path;
-        if (data.correct_answer !== undefined) updates.correct_answer = data.correct_answer;
+        const dataToUpdate: any = {};
+        
+        if (data.name !== undefined) dataToUpdate.name = data.name;
+        if (data.statement !== undefined) dataToUpdate.statement = data.statement;
+        if (data.imagePath !== undefined) dataToUpdate.image_path = data.imagePath;
+        if (data.correctAnswer !== undefined) dataToUpdate.correct_answer = data.correctAnswer;
         if (data.options !== undefined) {
-            if (data.correct_answer !== undefined && !data.options.includes(data.correct_answer)) {
-                throw new Error("A resposta correta deve estar nas novas opções.");
+            const correct = data.correctAnswer ?? exists.correct_answer;
+            if (!data.options.includes(correct)) {
+                throw new Error("A resposta correta deve ser uma das opções.");
             }
-            updates.options = data.options;
+            dataToUpdate.options = data.options;
         }
-        if (data.category_id !== undefined) updates.category_id = data.category_id;
+        if (data.categoryId !== undefined) dataToUpdate.category_id = data.categoryId;
 
-        return await this.signRepository.update(id, updates);
+        return await this.signRepository.update(id, dataToUpdate);
     }
 
     async deleteSign(id: number): Promise<void> {
