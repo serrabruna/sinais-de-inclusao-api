@@ -8,8 +8,16 @@ export class SignService {
         this.signRepository = new SignRepository();
     }
 
-    async createSign(data: Omit<Sign, 'id'>): Promise<Sign> {
-        if (!data.name || !data.category_id || !data.correct_answer || !data.options) {
+    async createSign(data: { 
+        categoryId: number; 
+        name: string; 
+        statement: string; 
+        imagePath: string; 
+        correctAnswer: string; 
+        options: string[]; 
+    }): Promise<Sign> {
+        
+        if (!data.name || !data.categoryId || !data.correctAnswer || !data.options) {
             throw new Error("Campos obrigatórios estão faltando.");
         }
 
@@ -20,20 +28,24 @@ export class SignService {
         
         const alreadyExists = await this.signRepository.findByNameAndCategory(
             sanitizedName, 
-            data.category_id
+            data.categoryId
         );
 
         if (alreadyExists) {
             throw new Error("Este sinal já está cadastrado nesta categoria.");
         }
 
-        if (!data.options.includes(data.correct_answer)) {
+        if (!data.options.includes(data.correctAnswer)) {
             throw new Error("A resposta correta deve ser uma das opções fornecidas.");
         }
 
         return await this.signRepository.create({
-            ...data,
-            name: sanitizedName
+            category_id: data.categoryId,
+            name: sanitizedName,
+            statement: data.statement,
+            image_path: data.imagePath,
+            correct_answer: data.correctAnswer,
+            options: data.options
         });
     }
 

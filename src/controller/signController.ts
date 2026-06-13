@@ -6,7 +6,22 @@ const signService = new SignService();
 export class SignController {
     async handleCreateSign(req: Request, res: Response) {
         try {
-            const newSign = await signService.createSign(req.body);
+            const { categoryId, name, statement, imagePath, correctAnswer, options } = req.body;
+            if (!categoryId || !name || !statement || !correctAnswer || !options) {
+                return res.status(400).json({ 
+                    error: "Os campos 'categoryId', 'name', 'statement', 'correctAnswer' e 'options' são obrigatórios." 
+                });
+            }
+
+            const newSign = await signService.createSign({
+                categoryId: Number(categoryId),
+                name,
+                statement,
+                imagePath: imagePath || '',
+                correctAnswer,
+                options
+            });
+
             return res.status(201).json(newSign);
         } catch (error: any) {
             return res.status(400).json({ error: error.message });

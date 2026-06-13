@@ -171,12 +171,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
+                "categoryId": { "type": "integer", "example": 1 },
                   "name": { "type": "string", "example": "Bom dia" },
-                  "category_id": { "type": "integer", "example": 1 },
-                  "correct_answer": { "type": "string", "example": "Bom dia" },
+                  "statement": { "type": "string", "example": "Qual é o sinal correspondente à saudação 'Bom dia'?" },
+                  "imagePath": { "type": "string", "example": "https://url-da-imagem.com/bom-dia.png" },
+                  "correctAnswer": { "type": "string", "example": "Bom dia" },
                   "options": { "type": "array", "items": { "type": "string" }, "example": ["Oi", "Bom dia", "Tchau", "Por favor"] }
-                }
               }
             }
           }
@@ -190,6 +190,24 @@
         "tags": ["Sinais"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categoryId": { "type": "integer" },
+                  "name": { "type": "string" },
+                  "statement": { "type": "string" },
+                  "imagePath": { "type": "string" },
+                  "correctAnswer": { "type": "string" },
+                  "options": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
         "responses": { "200": { "description": "Atualizado" } }
       },
       "delete": {
