@@ -104,14 +104,21 @@ export class SignService {
         const exists = await this.signRepository.findById(id);
         if (!exists) throw new Error("Sinal não encontrado.");
 
-        const finalOptions = data.options ?? exists.options;
-        const finalCorrect = data.correct_answer ?? exists.correct_answer;
-        
-        if (!finalOptions.includes(finalCorrect)) {
-        throw new Error("A resposta correta deve ser uma das opções listadas no array.");
-        }
+        const updates: Partial<Sign> = {};
 
-        return await this.signRepository.update(id, data);
+        if (data.name !== undefined) updates.name = data.name;
+        if (data.statement !== undefined) updates.statement = data.statement;
+        if (data.image_path !== undefined) updates.image_path = data.image_path;
+        if (data.correct_answer !== undefined) updates.correct_answer = data.correct_answer;
+        if (data.options !== undefined) {
+            if (data.correct_answer !== undefined && !data.options.includes(data.correct_answer)) {
+                throw new Error("A resposta correta deve estar nas novas opções.");
+            }
+            updates.options = data.options;
+        }
+        if (data.category_id !== undefined) updates.category_id = data.category_id;
+
+        return await this.signRepository.update(id, updates);
     }
 
     async deleteSign(id: number): Promise<void> {

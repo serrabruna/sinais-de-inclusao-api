@@ -1,6 +1,15 @@
 import { supabase } from '../config/supabase.js';
 import type { Sign } from '../model/sign.js';
 
+export type UpdateSignDTO = {
+    name?: string;
+    statement?: string;
+    image_path?: string;
+    correct_answer?: string;
+    options?: string[];
+    category_id?: number;
+};
+
 export class SignRepository {
     async findByCategory(categoryId: number): Promise<Sign[]> {
         const { data, error } = await supabase
@@ -74,17 +83,17 @@ export class SignRepository {
       return data;
     }
 
-    async update(id: number, sign: Partial<Sign>): Promise<Sign> {
-      const { data, error } = await supabase
-        .from('signs')
-        .update(sign)
-        .eq('id', id)
-        .select()
-        .single();
+  async update(id: number, sign: UpdateSignDTO): Promise<Sign> {
+        const { data, error } = await supabase
+            .from('signs')
+            .update(sign)
+            .eq('id', id)
+            .select()
+            .single();
 
-      if (error) throw new Error(`Erro ao atualizar sinal: ${error.message}`);
-      return data as Sign;
-  }
+        if (error) throw new Error(`Erro ao atualizar sinal: ${error.message}`);
+        return data as Sign;
+    }
 
   async delete(id: number): Promise<void> {
     const { error } = await supabase
