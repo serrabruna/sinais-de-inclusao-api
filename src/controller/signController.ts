@@ -56,6 +56,9 @@ export class SignController {
             const updatedSign = await signService.updateSign(id, req.body);
             return res.json(updatedSign);
         } catch (error: any) {
+            if (error.message === "Sinal não encontrado.") {
+                return res.status(404).json({ error: error.message });
+            }
             return res.status(400).json({ error: error.message });
         }
     }

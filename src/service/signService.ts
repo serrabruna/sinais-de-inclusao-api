@@ -132,15 +132,20 @@ export class SignService {
         if (data.name !== undefined) dataToUpdate.name = data.name;
         if (data.statement !== undefined) dataToUpdate.statement = data.statement;
         if (data.imagePath !== undefined) dataToUpdate.image_path = data.imagePath;
+        if (data.categoryId !== undefined) dataToUpdate.category_id = data.categoryId;
         if (data.correctAnswer !== undefined) dataToUpdate.correct_answer = data.correctAnswer;
+        
         if (data.options !== undefined) {
-            const correct = data.correctAnswer ?? exists.correct_answer;
+            const correct = data.correctAnswer ?? (dataToUpdate.correct_answer || exists.correct_answer);
             if (!data.options.includes(correct)) {
                 throw new Error("A resposta correta deve ser uma das opções.");
             }
             dataToUpdate.options = data.options;
         }
-        if (data.categoryId !== undefined) dataToUpdate.category_id = data.categoryId;
+
+        if (Object.keys(dataToUpdate).length === 0) {
+            return exists;
+        }
 
         return await this.signRepository.update(id, dataToUpdate);
     }
