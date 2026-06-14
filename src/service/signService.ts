@@ -100,6 +100,25 @@ export class SignService {
         return array;
     }   
 
+    async processAnswer(signId: number, userAnswer: string): Promise<boolean> {
+        const sign = await this.signRepository.findById(signId);
+        if (!sign) throw new Error("Sinal não encontrado.");
+        const normalize = (str: string) => {
+            return str
+                .normalize("NFD")             
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()                
+                .trim();                      
+        };
+
+        const cleanUserAnswer = normalize(userAnswer);
+        const cleanCorrectAnswer = normalize(sign.correct_answer);
+
+        console.log(`Debug: Comparando '${cleanUserAnswer}' com '${cleanCorrectAnswer}'`);
+
+        return cleanUserAnswer === cleanCorrectAnswer;
+    }
+
     async updateSign(id: number, data: Partial<Sign> & { 
         categoryId?: number, 
         imagePath?: string, 
