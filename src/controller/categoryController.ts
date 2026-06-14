@@ -37,14 +37,18 @@ export class CategoryController {
     }
 
     async handleUpdateCategory(req: Request, res: Response) {
-        try {
-            const id = Number(req.params.id);
-            const updatedCategory = await categoryService.updateCategory(id, req.body);
-            return res.json(updatedCategory);
-        } catch (error: any) {
-            return res.status(400).json({ error: error.message });
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
+        const updatedCategory = await categoryService.updateCategory(id, req.body);
+        return res.json(updatedCategory);
+    } catch (error: any) {
+        if (error.message === "Categoria não encontrada.") {
+            return res.status(404).json({ error: error.message });
         }
+        return res.status(400).json({ error: error.message });
     }
+}
 
     async handleDeleteCategory(req: Request, res: Response) {
         try {

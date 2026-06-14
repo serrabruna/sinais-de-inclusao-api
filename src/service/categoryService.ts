@@ -8,26 +8,26 @@ export class CategoryService {
         this.categoryRepository = new CategoryRepository();
     }
 
-    async createCategory(data: Omit<Category, 'id'>): Promise<Category> {
-        if (!data.name || !data.description) {
-            throw new Error("Nome e descrição são obrigatórios.");
-        }
-
-        const sanitizedName = data.name.trim();
-        if (!sanitizedName) {
-            throw new Error("O nome da categoria não pode ser vazio.");
-        }
-
-        const alreadyExists = await this.categoryRepository.findByName(sanitizedName);
-        if (alreadyExists) {
-            throw new Error("Categoria com este nome já existe.");
-        }
-
-        return await this.categoryRepository.create({
-            ...data,
-            name: sanitizedName
-        });
+    async createCategory(data: { name: string; order?: number; description: string }): Promise<Category> {
+    if (!data.name || !data.description) {
+        throw new Error("Nome e descrição são obrigatórios.");
     }
+
+    const sanitizedName = data.name.trim();
+    if (!sanitizedName) {
+        throw new Error("O nome da categoria não pode ser vazio.");
+    }
+
+    const alreadyExists = await this.categoryRepository.findByName(sanitizedName);
+    if (alreadyExists) {
+        throw new Error("Categoria com este nome já existe.");
+    }
+    
+    return await this.categoryRepository.create(
+        sanitizedName, 
+        data.description
+    );
+}
 
     async listAll(): Promise<Category[]> {
         return await this.categoryRepository.findAll();
@@ -50,8 +50,16 @@ export class CategoryService {
     async updateCategory(id: number, data: Partial<Category>): Promise<Category> {
         const exists = await this.categoryRepository.findById(id);
         if (!exists) throw new Error("Categoria não encontrada.");
-        
-        return await this.categoryRepository.update(id, data);
+
+        const updates: Partial<Category> = {};
+
+        if (data.name !== undefined) updates.name = data.name;
+        if (data.order !== undefined) updates.order = data.order;
+        if (data.description !== undefined) updates.description = data.description;
+        if (Object.keys(updates).length === 0) {
+            return exists;
+        }
+        return await this.categoryRepository.update(id, updates);
     }
 
     async deleteCategory(id: number): Promise<void> {

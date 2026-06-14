@@ -67,12 +67,11 @@ export class CategoryRepository {
 
   async update(id: number, category: Partial<Category>): Promise<Category> {
     const { data, error } = await supabase
-      .from('categories')
-      .update(category)
-      .eq('id', id)
-      .select()
-      .single();
-
+        .from('categories')
+        .update(category) 
+        .eq('id', id)
+        .select()
+        .single();
     if (error) throw new Error(`Erro ao atualizar categoria: ${error.message}`);
     return data as Category;
   }
