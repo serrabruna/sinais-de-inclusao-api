@@ -68,7 +68,7 @@ export class SignController {
             const id = Number(req.params.id);
             if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
             await signService.deleteSign(id);
-            return res.status(204).send();
+            return res.status(200).json({ message: "Sinal deletado com sucesso!" });
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
         }

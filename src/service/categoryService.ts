@@ -1,8 +1,11 @@
 import { CategoryRepository } from "../repository/categoryRepository.js";
 import type { Category } from "../model/category.js";
+import { SignRepository } from "../repository/signRepository.js";
+
 
 export class CategoryService {
     private categoryRepository: CategoryRepository;
+    private signRepository: SignRepository = new SignRepository();
 
     constructor() {
         this.categoryRepository = new CategoryRepository();
@@ -63,8 +66,11 @@ export class CategoryService {
     }
 
     async deleteCategory(id: number): Promise<void> {
-        const exists = await this.categoryRepository.findById(id);
-        if (!exists) throw new Error("Categoria não encontrada.");
+        const signsInCategory = await this.signRepository.findByCategory(id);
+    
+        if (signsInCategory && signsInCategory.length > 0) {
+            throw new Error("Não é possível deletar esta categoria pois ela possui sinais vinculados. Delete os sinais primeiro.");
+        }
 
         await this.categoryRepository.delete(id);
     }

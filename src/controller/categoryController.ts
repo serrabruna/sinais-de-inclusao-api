@@ -54,7 +54,7 @@ export class CategoryController {
         try {
             const id = Number(req.params.id);
             await categoryService.deleteCategory(id);
-            return res.status(204).send(); 
+            return res.status(200).json({ message: "Categoria deletada com sucesso!" });
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
         }
