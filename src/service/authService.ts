@@ -54,6 +54,7 @@ export class AuthService {
                 id: data.user.id,
                 email: data.user.email,
                 name: profile.name || data.user.email,
+                role: profile.role,
                 token: token
             };
 
