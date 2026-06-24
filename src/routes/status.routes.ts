@@ -7,6 +7,7 @@ import { SignController } from '../controller/signController.js';
 import { CategoryController } from '../controller/categoryController.js';
 import { FavoriteController } from '../controller/favoriteController.js';
 import { adminMiddleware } from '../middlewares/role.middleware.js';
+import * as userController from '../controller/userController.js';
 
 const categoryController = new CategoryController();
 const signController = new SignController();
@@ -24,6 +25,7 @@ routes.get('/status', (req: Request, res: Response) => {
 
 routes.post('/signup', register);
 routes.post('/login', login);
+routes.get('/user/xp', authMiddleware, userController.getUserXp);
 
 routes.get('/categories', authMiddleware, categoryController.handleListCategories);
 routes.get('/categories/:id', authMiddleware, categoryController.handleGetCategoryById);
