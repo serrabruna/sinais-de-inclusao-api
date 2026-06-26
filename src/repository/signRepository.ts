@@ -1,5 +1,7 @@
-import { supabase } from '../config/supabase.js';
+import { getSupabase } from '../config/supabase.js';
 import type { Sign } from '../model/sign.js';
+
+const supabase = getSupabase();
 
 export type UpdateSignDTO = {
     name?: string;

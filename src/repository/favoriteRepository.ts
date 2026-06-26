@@ -1,6 +1,7 @@
-import { supabase } from '../config/supabase.js';
+import { getSupabase } from '../config/supabase.js';
 import type { Favorite, FavoriteWithSign} from '../model/favorite.js';
 
+const supabase = getSupabase();
 export class FavoriteRepository {
 
     async add(userId: string, signId: number): Promise<Favorite> {

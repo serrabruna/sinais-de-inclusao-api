@@ -1,5 +1,7 @@
-import { supabase } from "../config/supabase.js";
+import { getSupabase } from '../config/supabase.js';
 import type { Category } from "../model/category.js";
+
+const supabase = getSupabase();
 
 export class CategoryRepository {
   async create(name: string, description: string): Promise<Category> {

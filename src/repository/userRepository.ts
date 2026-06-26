@@ -1,5 +1,7 @@
-import { supabase } from '../config/supabase.js';
+import { getSupabase } from '../config/supabase.js';
 import type { User } from '../model/user.js';
+
+const supabase = getSupabase();
 
 export class UserRepository {
 
