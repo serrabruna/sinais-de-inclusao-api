@@ -5,7 +5,7 @@ import { UserRepository } from '../repository/userRepository.js';
 
 const userService = new UserService();
 const signService = new SignService(); 
-const userRepository = new UserRepository
+const userRepository = new UserRepository();
 
 export const handleAnswerResponse = async (req: Request, res: Response) => {
     try {
