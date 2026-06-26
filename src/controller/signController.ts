@@ -1,19 +1,21 @@
 import type { Request, Response } from 'express';
 import { SignService } from '../service/signService.js';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from '../config/supabase.js';
 
 const signService = new SignService();
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 
 export class SignController {
     async handleCreateSign(req: Request, res: Response) {
         try {
+            const supabase = getSupabase(); 
+            
             const { categoryId, name, statement, correctAnswer, options } = req.body;
             const file = req.file; 
 
             if (!categoryId || !name || !statement || !correctAnswer || !options) {
                 return res.status(400).json({ 
-                    error: "Os campos 'categoryId', 'name', 'statement', 'correctAnswer' e 'options' são obrigatórios." 
+                    error: "Campos obrigatórios ausentes." 
                 });
             }
 
@@ -21,11 +23,11 @@ export class SignController {
             
             if (file) {
                 const fileName = `${Date.now()}_${file.originalname}`;
-                const { data, error } = await supabase.storage
-                    .from('sinais') 
+                const { error } = await supabase.storage
+                    .from('sinais')
                     .upload(fileName, file.buffer, { contentType: file.mimetype });
 
-                if (error) throw new Error("Erro ao subir imagem: " + error.message);
+                if (error) throw new Error("Erro no upload: " + error.message);
 
                 const { data: publicUrlData } = supabase.storage
                     .from('sinais')
