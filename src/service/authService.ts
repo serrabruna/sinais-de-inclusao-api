@@ -1,6 +1,8 @@
-import { supabase } from '../config/supabase.js';
+import { getSupabase } from '../config/supabase.js';
 import { UserRepository } from '../repository/userRepository.js';
 import jwt from 'jsonwebtoken';
+
+const supabase = getSupabase();
 
 export class AuthService {
     private userRepository: UserRepository;
