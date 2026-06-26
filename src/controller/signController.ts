@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getSupabase } from '../config/supabase.js';
 
 const signService = new SignService();
+const supabase = getSupabase();
 
 const sanitizeFileName = (name: string) => {
     return name.replace(/\s+/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -12,37 +13,31 @@ const sanitizeFileName = (name: string) => {
 export class SignController {
     async handleCreateSign(req: Request, res: Response) {
         try {
-            const supabase = getSupabase(); 
-            
             const { categoryId, name, statement, correctAnswer, options } = req.body;
+            const manualImagePath = req.body.imagePath ?? req.body.image_path;
             const file = req.file; 
 
             if (!categoryId || !name || !statement || !correctAnswer || !options) {
                 return res.status(400).json({ 
-                    error: "Campos obrigatórios ausentes." 
+                    error: "Os campos 'categoryId', 'name', 'statement', 'correctAnswer' e 'options' são obrigatórios." 
                 });
             }
 
-            let imagePath = '';
+            let imagePath = manualImagePath || '';
             
             if (file) {
-                const cleanName = sanitizeFileName(file.originalname);
-                const fileName = `${Date.now()}_${cleanName}`;
-                
-                const { error: uploadError } = await supabase.storage
+                const fileName = `${Date.now()}_${file.originalname}`;
+                const { data, error } = await supabase.storage
                     .from('sinais') 
-                    .upload(fileName, file.buffer, { 
-                        contentType: file.mimetype,
-                        upsert: true 
-                    });
+                    .upload(fileName, file.buffer, { contentType: file.mimetype });
 
-                if (uploadError) throw new Error("Erro no upload: " + uploadError.message);
+                if (error) throw new Error("Erro ao subir imagem: " + error.message);
 
                 const { data: publicUrlData } = supabase.storage
                     .from('sinais')
                     .getPublicUrl(fileName);
                 
-                imagePath = publicUrlData.publicUrl;
+                imagePath = publicUrlData.publicUrl; 
             }
 
             const newSign = await signService.createSign({
@@ -86,7 +81,16 @@ export class SignController {
         try {
             const id = Number(req.params.id);
             if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
-            const updatedSign = await signService.updateSign(id, req.body);
+
+            const body = req.body;
+            const normalizedData = {
+                ...body,
+                imagePath: body.imagePath ?? body.image_path,
+                categoryId: body.categoryId ?? body.category_id,
+                correctAnswer: body.correctAnswer ?? body.correct_answer,
+            };
+
+            const updatedSign = await signService.updateSign(id, normalizedData);
             return res.json(updatedSign);
         } catch (error: any) {
             if (error.message === "Sinal não encontrado.") {
