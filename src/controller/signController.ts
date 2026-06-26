@@ -1,24 +1,46 @@
 import type { Request, Response } from 'express';
 import { SignService } from '../service/signService.js';
+import { createClient } from '@supabase/supabase-js';
 
 const signService = new SignService();
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 
 export class SignController {
     async handleCreateSign(req: Request, res: Response) {
         try {
-            const { categoryId, name, statement, imagePath, correctAnswer, options } = req.body;
+            const { categoryId, name, statement, correctAnswer, options } = req.body;
+            const file = req.file; 
+
             if (!categoryId || !name || !statement || !correctAnswer || !options) {
                 return res.status(400).json({ 
                     error: "Os campos 'categoryId', 'name', 'statement', 'correctAnswer' e 'options' são obrigatórios." 
                 });
             }
+
+            let imagePath = '';
+            
+            if (file) {
+                const fileName = `${Date.now()}_${file.originalname}`;
+                const { data, error } = await supabase.storage
+                    .from('sinais') 
+                    .upload(fileName, file.buffer, { contentType: file.mimetype });
+
+                if (error) throw new Error("Erro ao subir imagem: " + error.message);
+
+                const { data: publicUrlData } = supabase.storage
+                    .from('sinais')
+                    .getPublicUrl(fileName);
+                
+                imagePath = publicUrlData.publicUrl;
+            }
+
             const newSign = await signService.createSign({
                 categoryId: Number(categoryId),
                 name,
                 statement,
-                imagePath: imagePath || '',
+                imagePath,
                 correctAnswer,
-                options
+                options: typeof options === 'string' ? JSON.parse(options) : options
             });
 
             return res.status(201).json(newSign);

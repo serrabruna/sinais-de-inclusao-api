@@ -8,10 +8,12 @@ import { CategoryController } from '../controller/categoryController.js';
 import { FavoriteController } from '../controller/favoriteController.js';
 import { adminMiddleware } from '../middlewares/role.middleware.js';
 import * as userController from '../controller/userController.js';
+import multer from 'multer';
 
 const categoryController = new CategoryController();
 const signController = new SignController();
 const favoriteController = new FavoriteController();
+const upload = multer({ storage: multer.memoryStorage() });
 
 const routes = Router();
 
@@ -38,7 +40,7 @@ routes.get('/categories/:id/signs', authMiddleware, signController.handleGetQues
 
 routes.get('/signs', authMiddleware, signController.handleListAllSigns);
 
-routes.post('/signs', authMiddleware, adminMiddleware, signController.handleCreateSign);
+routes.post('/signs', authMiddleware, upload.single('image'), signController.handleCreateSign);
 routes.put('/signs/:id', authMiddleware, adminMiddleware, signController.handleUpdateSign);
 routes.delete('/signs/:id', authMiddleware, adminMiddleware, signController.handleDeleteSign);
 
