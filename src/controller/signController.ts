@@ -28,11 +28,15 @@ export class SignController {
             if (file) {
                 const cleanName = sanitizeFileName(file.originalname);
                 const fileName = `${Date.now()}_${cleanName}`;
-                const { error } = await supabase.storage
-                    .from('sinais')
-                    .upload(fileName, file.buffer, { contentType: file.mimetype });
+                
+                const { error: uploadError } = await supabase.storage
+                    .from('sinais') 
+                    .upload(fileName, file.buffer, { 
+                        contentType: file.mimetype,
+                        upsert: true 
+                    });
 
-                if (error) throw new Error("Erro no upload: " + error.message);
+                if (uploadError) throw new Error("Erro no upload: " + uploadError.message);
 
                 const { data: publicUrlData } = supabase.storage
                     .from('sinais')
