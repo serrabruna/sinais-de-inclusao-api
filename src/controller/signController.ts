@@ -5,6 +5,10 @@ import { getSupabase } from '../config/supabase.js';
 
 const signService = new SignService();
 
+const sanitizeFileName = (name: string) => {
+    return name.replace(/\s+/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
 export class SignController {
     async handleCreateSign(req: Request, res: Response) {
         try {
@@ -22,7 +26,8 @@ export class SignController {
             let imagePath = '';
             
             if (file) {
-                const fileName = `${Date.now()}_${file.originalname}`;
+                const cleanName = sanitizeFileName(file.originalname);
+                const fileName = `${Date.now()}_${cleanName}`;
                 const { error } = await supabase.storage
                     .from('sinais')
                     .upload(fileName, file.buffer, { contentType: file.mimetype });
