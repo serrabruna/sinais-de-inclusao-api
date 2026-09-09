@@ -1,0 +1,58 @@
+import { getSupabase } from '../config/supabase.js';
+import { UserRepository } from '../repository/userRepository.js';
+import jwt from 'jsonwebtoken';
+const supabase = getSupabase();
+export class AuthService {
+    userRepository;
+    constructor() {
+        this.userRepository = new UserRepository();
+    }
+    async signUp(email, password, name, role = 'student') {
+        const { data, error } = await supabase.auth.signUp({
+            email: email.trim().toLowerCase(),
+            password,
+        });
+        if (error)
+            throw new Error(error.message);
+        if (!data.user)
+            throw new Error('Erro ao criar usuário.');
+        await this.userRepository.createProfile(data.user.id, name, role);
+        return { id: data.user.id, email: data.user.email };
+    }
+    async signIn(email, password) {
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email.trim().toLowerCase(),
+                password,
+            });
+            if (error)
+                throw new Error(error.message);
+            if (!data.user)
+                throw new Error("Usuário não encontrado ou credenciais inválidas.");
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('role, name')
+                .eq('id', data.user.id)
+                .single();
+            if (profileError || !profile) {
+                throw new Error("Perfil do usuário não encontrado no sistema.");
+            }
+            const token = jwt.sign({
+                sub: data.user.id,
+                role: profile.role
+            }, process.env.JWT_SECRET, { expiresIn: '1d' });
+            return {
+                id: data.user.id,
+                email: data.user.email,
+                name: profile.name || data.user.email,
+                role: profile.role,
+                token: token
+            };
+        }
+        catch (err) {
+            console.error('Erro no signIn:', err);
+            throw new Error(err.message || 'Erro ao autenticar usuário.');
+        }
+    }
+}
+//# sourceMappingURL=authService.js.map

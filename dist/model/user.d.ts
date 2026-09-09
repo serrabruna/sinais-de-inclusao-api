@@ -1,0 +1,8 @@
+export interface User {
+    id: string;
+    name: string;
+    current_xp: number;
+    unlocked_level: number;
+    role: 'student' | 'admin';
+}
+//# sourceMappingURL=user.d.ts.map

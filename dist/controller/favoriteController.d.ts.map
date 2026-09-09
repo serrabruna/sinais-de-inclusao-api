@@ -1,0 +1,1 @@
+{"version":3,"file":"favoriteController.d.ts","sourceRoot":"","sources":["../../src/controller/favoriteController.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAKjD,qBAAa,kBAAkB;IACrB,YAAY,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,EAAE,QAAQ;IAexC,qBAAqB,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,EAAE,QAAQ;CAYtD"}
