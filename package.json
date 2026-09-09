@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc && copyfiles -u 1 src/config/*.json dist/",
+    "build": "tsc && npx copyfiles -u 1 src/config/*.json dist/",
     "start": "node dist/server.js"
   },
   "repository": {
