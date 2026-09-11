@@ -104,4 +104,20 @@ export class UserService {
         return { streak: novoStreak, activeToday: true };
     }
 
+    async updateUserName(userId: string, name: string) {
+        if (!userId) throw new Error('ID do usuário não fornecido.');
+        if (!name || name.trim().length === 0) {
+            throw new Error('O nome não pode ser vazio.');
+        }
+
+        await this.userRepository.updateName(userId, name.trim());
+        return { message: 'Nome atualizado com sucesso!', name: name.trim() };
+    }
+
+    async deleteUserAccount(userId: string) {
+        if (!userId) throw new Error('ID do usuário não fornecido.');
+        await this.userRepository.deleteAccount(userId);
+        return { message: 'Conta excluída com sucesso!' };
+    }
+
 }

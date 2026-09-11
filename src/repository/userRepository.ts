@@ -66,4 +66,25 @@ export class UserRepository {
 
     if (error) throw new Error(`Erro ao atualizar sequência: ${error.message}`);
   }
+
+  async updateName(id: string, name: string): Promise<void> {
+    const { error } = await supabase
+        .from('profiles')
+        .update({ name })
+        .eq('id', id);
+
+    if (error) throw new Error(`Erro ao atualizar nome: ${error.message}`);
+  }
+
+  async deleteAccount(id: string): Promise<void> {
+      const { error: profileError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', id);
+
+      if (profileError) throw new Error(`Erro ao deletar perfil: ${profileError.message}`);
+
+      const { error: authError } = await supabase.auth.admin.deleteUser(id);
+      if (authError) throw new Error(`Erro ao deletar conta de autenticação: ${authError.message}`);
+  }
 }
