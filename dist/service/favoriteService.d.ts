@@ -5,6 +5,11 @@ export declare class FavoriteService {
         isFavorite: boolean;
         message: string;
     }>;
-    listUserFavorites(userId: string): Promise<import("../model/favorite.js").FavoriteWithSign[]>;
+    listUserFavorites(userId: string): Promise<{
+        id: any;
+        name: any;
+        imagePath: any;
+        statement: any;
+    }[]>;
 }
 //# sourceMappingURL=favoriteService.d.ts.map

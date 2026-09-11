@@ -18,7 +18,15 @@ export class FavoriteService {
         }
     }
     async listUserFavorites(userId) {
-        return await this.favoriteRepository.findByUserId(userId);
+        const rawFavorites = await this.favoriteRepository.findByUserId(userId);
+        return (rawFavorites || [])
+            .filter((fav) => fav.signs !== null && fav.signs !== undefined)
+            .map((fav) => ({
+            id: fav.sign_id,
+            name: fav.signs?.name ?? 'Sem nome',
+            imagePath: fav.signs?.image_path ?? '',
+            statement: fav.signs?.statement ?? ''
+        }));
     }
 }
 //# sourceMappingURL=favoriteService.js.map

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { handleAnswerResponse } from '../controller/userController.js';
+import { getProfile, handleAnswerResponse, postStreak } from '../controller/userController.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { login, register } from '../controller/authController.js';
 import { SignController } from '../controller/signController.js';
@@ -45,6 +45,9 @@ routes.put('/signs/:id', authMiddleware, adminMiddleware, signController.handleU
 routes.delete('/signs/:id', authMiddleware, adminMiddleware, signController.handleDeleteSign);
 
 routes.post('/answer', authMiddleware, handleAnswerResponse);
+
+routes.get('/user/profile', authMiddleware, getProfile);
+routes.post('/user/streak', authMiddleware, postStreak);
 
 routes.post('/favorites', authMiddleware, favoriteController.handleToggle);
 routes.get('/favorites/me', authMiddleware, favoriteController.handleListMyFavorites);

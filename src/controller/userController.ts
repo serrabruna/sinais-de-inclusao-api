@@ -52,3 +52,27 @@ export const getUserXp = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Erro ao buscar XP" });
     }
 };
+
+export const getProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId || (req as any).user?.id;
+        if (!userId) return res.status(401).json({ error: "Não autenticado." });
+
+        const profile = await userService.getUserProfile(userId);
+        return res.status(200).json(profile);
+    } catch (error: any) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+export const postStreak = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId || (req as any).user?.id;
+        if (!userId) return res.status(401).json({ error: "Não autenticado." });
+
+        const streak = await userService.registerDailyStreak(userId);
+        return res.status(200).json(streak);
+    } catch (error: any) {
+        return res.status(500).json({ error: error.message });
+    }
+};

@@ -8,6 +8,10 @@
   "servers": [
     {
       "url": "https://sinais-de-inclusao-api.onrender.com",
+      "description": "Servidor de Produção"
+    },
+    {
+      "url": "http://localhost:3000",
       "description": "Servidor Local"
     }
   ],
@@ -47,13 +51,15 @@
                   "email": { "type": "string", "example": "bruna@email.com" },
                   "password": { "type": "string", "example": "123456" },
                   "role": { "type": "string", "example": "admin" }
-                }
+                },
+                "required": ["name", "email", "password"]
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Usuário criado." }
+          "201": { "description": "Usuário criado com sucesso." },
+          "400": { "description": "Dados inválidos ou usuário já cadastrado." }
         }
       }
     },
@@ -70,13 +76,36 @@
                 "properties": {
                   "email": { "type": "string", "example": "bruna@email.com" },
                   "password": { "type": "string", "example": "123456" }
-                }
+                },
+                "required": ["email", "password"]
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Token retornado." }
+          "200": {
+            "description": "Token JWT retornado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string", "example": "eyJhbGciOi..." },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "email": { "type": "string" },
+                        "role": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciais inválidas." }
         }
       }
     },
@@ -99,9 +128,65 @@
               }
             }
           },
-          "404": {
-            "description": "Usuário não encontrado"
-          }
+          "401": { "description": "Não autorizado." },
+          "404": { "description": "Usuário não encontrado." }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "summary": "Retorna os dados completos do perfil do usuário logado",
+        "tags": ["Usuário"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados do perfil retornados com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+                    "name": { "type": "string", "example": "Bruna" },
+                    "email": { "type": "string", "example": "bruna@email.com" },
+                    "xp": { "type": "integer", "example": 120 },
+                    "unlockedLevel": { "type": "integer", "example": 2 },
+                    "icon": { "type": "string", "example": "default_avatar" },
+                    "streak": { "type": "integer", "example": 5 },
+                    "streakActiveToday": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autorizado." },
+          "404": { "description": "Usuário não encontrado." },
+          "500": { "description": "Erro interno no servidor." }
+        }
+      }
+    },
+    "/user/streak": {
+      "post": {
+        "summary": "Registra a atividade diária e atualiza a sequência (Esquenta)",
+        "tags": ["Usuário", "Gameficação"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Sequência atualizada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "streak": { "type": "integer", "example": 6 },
+                    "activeToday": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autorizado." },
+          "500": { "description": "Erro interno no servidor." }
         }
       }
     },
@@ -110,7 +195,10 @@
         "summary": "Lista todas as categorias (App)",
         "tags": ["Categorias"],
         "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "Sucesso" } }
+        "responses": {
+          "200": { "description": "Sucesso" },
+          "401": { "description": "Não autorizado." }
+        }
       },
       "post": {
         "summary": "Cria uma nova categoria (Admin)",
@@ -125,12 +213,16 @@
                 "properties": {
                   "name": { "type": "string", "example": "Saudações" },
                   "description": { "type": "string", "example": "Sinais do dia a dia" }
-                }
+                },
+                "required": ["name"]
               }
             }
           }
         },
-        "responses": { "201": { "description": "Criado" } }
+        "responses": {
+          "201": { "description": "Categoria criada com sucesso." },
+          "401": { "description": "Não autorizado." }
+        }
       }
     },
     "/categories/{id}": {
@@ -138,14 +230,21 @@
         "summary": "Busca uma categoria por ID",
         "tags": ["Categorias"],
         "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Sucesso" } }
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Sucesso" },
+          "404": { "description": "Categoria não encontrada." }
+        }
       },
       "put": {
         "summary": "Atualiza uma categoria (Admin)",
         "tags": ["Categorias"],
         "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -160,14 +259,22 @@
             }
           }
         },
-        "responses": { "200": { "description": "Atualizado" } }
+        "responses": {
+          "200": { "description": "Categoria atualizada com sucesso." },
+          "404": { "description": "Categoria não encontrada." }
+        }
       },
       "delete": {
         "summary": "Deleta uma categoria (Admin)",
         "tags": ["Categorias"],
         "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "204": { "description": "Deletado" } }
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "204": { "description": "Categoria deletada com sucesso." },
+          "404": { "description": "Categoria não encontrada." }
+        }
       }
     },
     "/categories/{id}/signs": {
@@ -175,8 +282,12 @@
         "summary": "Carrega o Quiz de sinais de uma categoria",
         "tags": ["Sinais"],
         "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Lista de questões/sinais" } }
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Lista de questões/sinais da categoria." }
+        }
       }
     },
     "/signs": {
@@ -184,31 +295,41 @@
         "summary": "Lista todos os sinais gerais",
         "tags": ["Sinais"],
         "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "Sucesso" } }
+        "responses": {
+          "200": { "description": "Sucesso" }
+        }
       },
       "post": {
-        "summary": "Cadastra um novo sinal/pergunta (Admin)",
+        "summary": "Cadastra um novo sinal/pergunta com upload de imagem (Admin)",
         "tags": ["Sinais"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "categoryId": { "type": "integer", "example": 1 },
                   "name": { "type": "string", "example": "Bom dia" },
                   "statement": { "type": "string", "example": "Qual é o sinal correspondente à saudação 'Bom dia'?" },
-                  "imagePath": { "type": "string", "example": "https://url-da-imagem.com/bom-dia.png" },
+                  "image": { "type": "string", "format": "binary", "description": "Arquivo de imagem do sinal" },
                   "correctAnswer": { "type": "string", "example": "Bom dia" },
-                  "options": { "type": "array", "items": { "type": "string" }, "example": ["Oi", "Bom dia", "Tchau", "Por favor"] }
-                }
+                  "options": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "example": ["Oi", "Bom dia", "Tchau", "Por favor"]
+                  }
+                },
+                "required": ["categoryId", "name", "statement", "image", "correctAnswer", "options"]
               }
             }
           }
         },
-        "responses": { "201": { "description": "Criado" } }
+        "responses": {
+          "201": { "description": "Sinal criado com sucesso." },
+          "401": { "description": "Não autorizado." }
+        }
       }
     },
     "/signs/{id}": {
@@ -216,7 +337,9 @@
         "summary": "Atualiza um sinal existente (Admin)",
         "tags": ["Sinais"],
         "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -235,14 +358,22 @@
             }
           }
         },
-        "responses": { "200": { "description": "Atualizado" } }
+        "responses": {
+          "200": { "description": "Sinal atualizado com sucesso." },
+          "404": { "description": "Sinal não encontrado." }
+        }
       },
       "delete": {
         "summary": "Deleta um sinal do sistema (Admin)",
         "tags": ["Sinais"],
         "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "204": { "description": "Deletado" } }
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "204": { "description": "Sinal deletado com sucesso." },
+          "404": { "description": "Sinal não encontrado." }
+        }
       }
     },
     "/answer": {
@@ -259,12 +390,34 @@
                 "properties": {
                   "sign_id": { "type": "integer", "example": 2 },
                   "user_answer": { "type": "string", "example": "Bom dia" }
-                }
+                },
+                "required": ["sign_id", "user_answer"]
               }
             }
           }
         },
-        "responses": { "200": { "description": "Resposta processada computando XP/Pontos" } }
+        "responses": {
+          "200": {
+            "description": "Resposta processada computando XP/Pontos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Parabéns, você acertou!" },
+                    "xpGained": { "type": "integer", "example": 10 },
+                    "totalXp": { "type": "integer", "example": 120 },
+                    "currentLevel": { "type": "integer", "example": 2 },
+                    "levelUp": { "type": "boolean", "example": false },
+                    "streak": { "type": "integer", "example": 5 }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Campos obrigatórios ausentes ou inválidos." },
+          "401": { "description": "Não autorizado." }
+        }
       }
     },
     "/favorites": {
@@ -280,12 +433,29 @@
                 "type": "object",
                 "properties": {
                   "signId": { "type": "integer", "example": 4 }
-                }
+                },
+                "required": ["signId"]
               }
             }
           }
         },
-        "responses": { "200": { "description": "Favoritado/Desfavoritado com sucesso" } }
+        "responses": {
+          "200": {
+            "description": "Favoritado ou desfavoritado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isFavorite": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Adicionado aos favoritos." }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autorizado." }
+        }
       }
     },
     "/favorites/me": {
@@ -293,7 +463,28 @@
         "summary": "Lista os sinais favoritados pelo aluno logado",
         "tags": ["Favoritos"],
         "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "Lista de favoritos retornada" } }
+        "responses": {
+          "200": {
+            "description": "Lista de favoritos com os dados dos sinais",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer", "example": 4 },
+                      "name": { "type": "string", "example": "Obrigado" },
+                      "imagePath": { "type": "string", "example": "https://url-da-imagem.com/obrigado.png" },
+                      "statement": { "type": "string", "example": "Qual o sinal para Obrigado?" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autorizado." }
+        }
       }
     }
   }
