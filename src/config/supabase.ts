@@ -1,13 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config'; 
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import 'dotenv/config';
 
-export const getSupabase = () => {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseKey) {
-        throw new Error("Variáveis SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configuradas.");
-    }
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error("Variáveis SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configuradas no ambiente.");
+}
 
-    return createClient(supabaseUrl, supabaseKey);
+const supabaseInstance: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+export const getSupabase = (): SupabaseClient => {
+  return supabaseInstance;
 };

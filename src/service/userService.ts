@@ -1,5 +1,4 @@
 import { UserRepository } from '../repository/userRepository.js';
-import type { User } from '../model/user.js';
 
 export class UserService {
     private userRepository: UserRepository;
@@ -8,11 +7,10 @@ export class UserService {
         this.userRepository = new UserRepository();
     }
 
-    async getUserProfile(userId: string) {
+    async getUserProfile(userId: string, emailFallback: string = '') {
         const user = await this.userRepository.findProfileWithEmail(userId);
         if (!user) throw new Error('Usuário não encontrado.');
 
-        
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
@@ -20,27 +18,27 @@ export class UserService {
         let streakExibicao = user.streak_count || 0;
 
         if (user.last_streak_date) {
-        const ultimaData = new Date(user.last_streak_date);
-        ultimaData.setHours(0, 0, 0, 0);
+            const ultimaData = new Date(user.last_streak_date);
+            ultimaData.setHours(0, 0, 0, 0);
 
-        const diffDias = Math.floor((hoje.getTime() - ultimaData.getTime()) / (1000 * 60 * 60 * 24));
+            const diffDias = Math.floor((hoje.getTime() - ultimaData.getTime()) / (1000 * 60 * 60 * 24));
 
-        if (diffDias === 0) {
-            ativoHoje = true;
-        } else if (diffDias > 1) {
-            streakExibicao = 0; 
-        }
+            if (diffDias === 0) {
+                ativoHoje = true;
+            } else if (diffDias > 1) {
+                streakExibicao = 0; 
+            }
         }
 
         return {
-        id: user.id,
-        name: user.name,
-        email: user.email || '',
-        xp: user.current_xp,
-        unlockedLevel: user.unlocked_level,
-        icon: user.avatar_icon || 'default_avatar',
-        streak: streakExibicao,
-        streakActiveToday: ativoHoje,
+            id: user.id,
+            name: user.name,
+            email: user.email || emailFallback,
+            xp: user.current_xp,
+            unlockedLevel: user.unlocked_level,
+            icon: user.avatar_icon || 'default_avatar',
+            streak: streakExibicao,
+            streakActiveToday: ativoHoje,
         };
     }
 
@@ -60,10 +58,10 @@ export class UserService {
         const streakData = await this.registerDailyStreak(userId);
 
         return {
-        currentXp: newXp,
-        unlockedLevel: newLevel,
-        levelUp,
-        streak: streakData.streak
+            currentXp: newXp,
+            unlockedLevel: newLevel,
+            levelUp,
+            streak: streakData.streak
         };
     }
 
@@ -119,5 +117,4 @@ export class UserService {
         await this.userRepository.deleteAccount(userId);
         return { message: 'Conta excluída com sucesso!' };
     }
-
 }
