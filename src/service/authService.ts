@@ -44,14 +44,17 @@ export class AuthService {
             if (profileError || !profile) {
                 throw new Error("Perfil do usuário não encontrado no sistema.");
             }
+
             const token = jwt.sign(
                 { 
                     sub: data.user.id, 
+                    email: data.user.email,
                     role: profile.role 
                 }, 
                 process.env.JWT_SECRET as string, 
                 { expiresIn: '1d' }
             );
+
             return {
                 id: data.user.id,
                 email: data.user.email,

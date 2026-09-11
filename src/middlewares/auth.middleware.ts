@@ -6,6 +6,7 @@ declare global {
         interface Request {
             userId: string;
             userRole?: string;
+            userEmail?: string;
         }
     }
 }
@@ -13,6 +14,7 @@ declare global {
 interface TokenPayload {
     sub: string; 
     role: string; 
+    email?: string;
 }
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -41,10 +43,12 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
         
         req.userId = decoded.sub;
         req.userRole = decoded.role;
+        req.userEmail = decoded.email ?? '';
         
         (req as any).user = {
             id: decoded.sub,
-            role: decoded.role
+            role: decoded.role,
+            email: decoded.email ?? ''
         };
 
         return next();
