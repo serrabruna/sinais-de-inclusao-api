@@ -6,10 +6,16 @@ const categoryService = new CategoryService();
 export class CategoryController {
     async handleListCategories(req: Request, res: Response) {
         try {
-            const categories = await categoryService.listAll();
-            return res.json(categories);
+        const userId = (req as any).user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ error: 'Usuário não autenticado.' });
+        }
+
+        const categories = await CategoryService.listAllWithProgress(userId);
+        return res.status(200).json(categories);
         } catch (error: any) {
-            return res.status(400).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
         }
     }
 

@@ -91,7 +91,7 @@ export class CategoryRepository {
     const { data: categories, error: catError } = await supabase
       .from('categories')
       .select('*')
-      .order('id', { ascending: true });
+      .order('order', { ascending: true });
 
     if (catError) throw catError;
 
@@ -100,7 +100,10 @@ export class CategoryRepository {
       .select('category_id, stars')
       .eq('user_id', userId);
 
-    if (progError) throw progError;
+    if (progError) {
+      
+      return categories.map((cat) => ({ ...cat, stars: 0 }));
+    }
 
     const progressMap = new Map<number, number>(
       progress?.map((p) => [p.category_id, p.stars]) || []
@@ -108,7 +111,7 @@ export class CategoryRepository {
 
     return categories.map((cat) => ({
       ...cat,
-      stars: progressMap.get(cat.id) || 0,
+      stars: progressMap.get(cat.id) ?? 0,
     }));
   }
 
