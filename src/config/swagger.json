@@ -151,9 +151,19 @@
                     "email": { "type": "string", "example": "bruna@email.com" },
                     "xp": { "type": "integer", "example": 120 },
                     "unlockedLevel": { "type": "integer", "example": 2 },
-                    "icon": { "type": "string", "example": "default_avatar" },
+                    "icon": { "type": "string", "example": "face_4" },
                     "streak": { "type": "integer", "example": 5 },
-                    "streakActiveToday": { "type": "boolean", "example": true }
+                    "streakActiveToday": { "type": "boolean", "example": true },
+                    "weeklyActivity": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": { "type": "string", "example": "2026-09-07" },
+                          "completed": { "type": "boolean", "example": true }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -246,7 +256,7 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "date": { "type": "string", "example": "2026-09-11" },
+                          "date": { "type": "string", "example": "2026-09-07" },
                           "completed": { "type": "boolean", "example": true }
                         }
                       }

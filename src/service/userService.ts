@@ -1,5 +1,12 @@
 import { UserRepository } from '../repository/userRepository.js';
 
+const toLocalDateString = (date: Date): string => {
+    const ano = date.getFullYear();
+    const mes = String(date.getMonth() + 1).padStart(2, '0');
+    const dia = String(date.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+};
+
 export class UserService {
     private userRepository: UserRepository;
 
@@ -8,6 +15,13 @@ export class UserService {
     }
 
     private async buildWeeklyActivity(userId: string): Promise<Array<{ date: string; completed: boolean }>> {
+        const toLocalDateString = (d: Date) => {
+            const ano = d.getFullYear();
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const dia = String(d.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        };
+
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
@@ -18,18 +32,20 @@ export class UserService {
         segundaFeira.setDate(hoje.getDate() - diasAteSegunda);
         segundaFeira.setHours(0, 0, 0, 0);
 
-        const inicioSemanaStr = segundaFeira.toISOString().split('T')[0]!;
+        const inicioSemanaStr = toLocalDateString(segundaFeira);
         const datasConcluidas = await this.userRepository.getRecentActivityDates(userId, inicioSemanaStr);
 
         const weeklyActivity: Array<{ date: string; completed: boolean }> = [];
         const ponteiro = new Date(segundaFeira);
-        
-        while (ponteiro <= hoje) {
-            const dataStr = ponteiro.toISOString().split('T')[0]!;
+
+        for (let i = 0; i < 7; i++) {
+            const dataStr = toLocalDateString(ponteiro);
+            
             weeklyActivity.push({
                 date: dataStr,
                 completed: datasConcluidas.includes(dataStr)
             });
+
             ponteiro.setDate(ponteiro.getDate() + 1);
         }
 
@@ -59,6 +75,8 @@ export class UserService {
             }
         }
 
+        const weeklyActivity = await this.buildWeeklyActivity(userId);
+
         return {
             id: user.id,
             name: user.name,
@@ -68,6 +86,7 @@ export class UserService {
             icon: user.avatar_icon || 'default_avatar',
             streak: streakExibicao,
             streakActiveToday: ativoHoje,
+            weeklyActivity, 
         };
     }
 
