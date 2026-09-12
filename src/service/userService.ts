@@ -7,6 +7,35 @@ export class UserService {
         this.userRepository = new UserRepository();
     }
 
+    private async buildWeeklyActivity(userId: string): Promise<Array<{ date: string; completed: boolean }>> {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        const diaSemana = hoje.getDay();
+        const diasAteSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+
+        const segundaFeira = new Date(hoje);
+        segundaFeira.setDate(hoje.getDate() - diasAteSegunda);
+        segundaFeira.setHours(0, 0, 0, 0);
+
+        const inicioSemanaStr = segundaFeira.toISOString().split('T')[0]!;
+        const datasConcluidas = await this.userRepository.getRecentActivityDates(userId, inicioSemanaStr);
+
+        const weeklyActivity: Array<{ date: string; completed: boolean }> = [];
+        const ponteiro = new Date(segundaFeira);
+        
+        while (ponteiro <= hoje) {
+            const dataStr = ponteiro.toISOString().split('T')[0]!;
+            weeklyActivity.push({
+                date: dataStr,
+                completed: datasConcluidas.includes(dataStr)
+            });
+            ponteiro.setDate(ponteiro.getDate() + 1);
+        }
+
+        return weeklyActivity;
+    }
+
     async getUserProfile(userId: string, emailFallback: string = '') {
         const user = await this.userRepository.findProfileWithEmail(userId);
         if (!user) throw new Error('Usuário não encontrado.');
@@ -61,7 +90,8 @@ export class UserService {
             currentXp: newXp,
             unlockedLevel: newLevel,
             levelUp,
-            streak: streakData.streak
+            streak: streakData.streak,
+            weeklyActivity: streakData.weeklyActivity
         };
     }
 
@@ -76,10 +106,10 @@ export class UserService {
         }
 
         const agora = new Date();
-        const partesData = agora.toISOString().split('T');
-        const hojeStr: string = partesData[0]!; 
+        const hojeStr = agora.toISOString().split('T')[0]!;
 
         let novoStreak: number = 1;
+        let jaTreinouHoje = false;
 
         if (user.last_streak_date) {
             const hoje = new Date();
@@ -91,15 +121,26 @@ export class UserService {
             const diffDias = Math.floor((hoje.getTime() - ultimaData.getTime()) / (1000 * 60 * 60 * 24));
 
             if (diffDias === 0) {
-                return { streak: user.streak_count, activeToday: true };
+                jaTreinouHoje = true;
+                novoStreak = user.streak_count || 1;
             } else if (diffDias === 1) {
                 novoStreak = (user.streak_count || 0) + 1;
             }
         }
 
-        await this.userRepository.updateStreak(userId, novoStreak, hojeStr);
+        if (!jaTreinouHoje || user.last_streak_date !== hojeStr) {
+            await this.userRepository.updateStreak(userId, novoStreak, hojeStr);
+            await this.userRepository.logDailyActivity(userId, hojeStr);
+        }
 
-        return { streak: novoStreak, activeToday: true };
+        const weeklyActivity = await this.buildWeeklyActivity(userId);
+
+        return {
+            xp: user.current_xp || 0,
+            streak: novoStreak,
+            streakActiveToday: true,
+            weeklyActivity
+        };
     }
 
     async updateUserName(userId: string, name: string) {

@@ -231,14 +231,25 @@
         "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
-            "description": "Sequência atualizada com sucesso.",
+            "description": "Sequência atualizada e histórico semanal retornados com sucesso.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "streak": { "type": "integer", "example": 6 },
-                    "activeToday": { "type": "boolean", "example": true }
+                    "xp": { "type": "integer", "example": 120 },
+                    "streak": { "type": "integer", "example": 3 },
+                    "streakActiveToday": { "type": "boolean", "example": true },
+                    "weeklyActivity": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": { "type": "string", "example": "2026-09-11" },
+                          "completed": { "type": "boolean", "example": true }
+                        }
+                      }
+                    }
                   }
                 }
               }

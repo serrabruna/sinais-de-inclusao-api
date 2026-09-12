@@ -74,8 +74,8 @@ export const postStreak = async (req: Request, res: Response) => {
         const userId = req.userId || (req as any).user?.id;
         if (!userId) return res.status(401).json({ error: "Não autenticado." });
 
-        const streak = await userService.registerDailyStreak(userId);
-        return res.status(200).json(streak);
+        const result = await userService.registerDailyStreak(userId);
+        return res.status(200).json(result);
     } catch (error: any) {
         return res.status(500).json({ error: error.message });
     }

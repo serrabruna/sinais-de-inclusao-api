@@ -93,4 +93,21 @@ export class UserRepository {
           throw new Error(`Erro ao deletar conta de autenticação: ${authError.message}`);
       }
   }
+
+  async logDailyActivity(userId: string, dateStr: string): Promise<void> {
+    await supabase
+        .from('user_daily_activity')
+        .upsert({ user_id: userId, activity_date: dateStr }, { onConflict: 'user_id, activity_date' });
+}
+
+  async getRecentActivityDates(userId: string, startDateStr: string): Promise<string[]> {
+      const { data, error } = await supabase
+          .from('user_daily_activity')
+          .select('activity_date')
+          .eq('user_id', userId)
+          .gte('activity_date', startDateStr);
+
+      if (error || !data) return [];
+      return data.map((row: any) => row.activity_date);
+  }
 }
