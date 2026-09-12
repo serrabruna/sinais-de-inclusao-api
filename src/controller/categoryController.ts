@@ -37,24 +37,58 @@ export class CategoryController {
     }
 
     async handleUpdateCategory(req: Request, res: Response) {
-    try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
-        const updatedCategory = await categoryService.updateCategory(id, req.body);
-        return res.json(updatedCategory);
-    } catch (error: any) {
-        if (error.message === "Categoria não encontrada.") {
-            return res.status(404).json({ error: error.message });
+        try {
+            const id = Number(req.params.id);
+            if (isNaN(id)) return res.status(400).json({ error: "ID inválido." });
+            const updatedCategory = await categoryService.updateCategory(id, req.body);
+            return res.json(updatedCategory);
+        } catch (error: any) {
+            if (error.message === "Categoria não encontrada.") {
+                return res.status(404).json({ error: error.message });
+            }
+            return res.status(400).json({ error: error.message });
         }
-        return res.status(400).json({ error: error.message });
     }
-}
 
     async handleDeleteCategory(req: Request, res: Response) {
         try {
             const id = Number(req.params.id);
             await categoryService.deleteCategory(id);
             return res.status(200).json({ message: "Categoria deletada com sucesso!" });
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    static async listAll(req: Request, res: Response) {
+        try {
+            const user = (req as any).user;
+            const userId = user?.id;
+
+            if (!userId) {
+            return res.status(401).json({ error: 'Usuário não autenticado.' });
+            }
+
+            const categories = await CategoryService.listAllWithProgress(userId);
+            return res.status(200).json(categories);
+        } catch (error: any) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async saveStars(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user?.id;
+            
+            if (!userId) {
+                return res.status(401).json({ error: 'Usuário não autenticado.' });
+            }
+
+            const categoryId = Number(req.params.id);
+            const { stars } = req.body;
+
+            await CategoryService.saveCategoryStars(userId, categoryId, Number(stars));
+            return res.status(200).json({ message: 'Estrelas salvas com sucesso!' });
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
         }

@@ -86,4 +86,54 @@ export class CategoryRepository {
 
     if (error) throw new Error(`Erro ao deletar categoria: ${error.message}`);
   }
+
+  static async findAllWithUserStars(userId: string) {
+    const { data: categories, error: catError } = await supabase
+      .from('categories')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (catError) throw catError;
+
+    const { data: progress, error: progError } = await supabase
+      .from('user_category_progress')
+      .select('category_id, stars')
+      .eq('user_id', userId);
+
+    if (progError) throw progError;
+
+    const progressMap = new Map<number, number>(
+      progress?.map((p) => [p.category_id, p.stars]) || []
+    );
+
+    return categories.map((cat) => ({
+      ...cat,
+      stars: progressMap.get(cat.id) || 0,
+    }));
+  }
+
+  static async upsertStars(userId: string, categoryId: number, stars: number) {
+    const { data: current } = await supabase
+      .from('user_category_progress')
+      .select('stars')
+      .eq('user_id', userId)
+      .eq('category_id', categoryId)
+      .maybeSingle();
+
+    if (!current || stars > current.stars) {
+      const { error } = await supabase
+        .from('user_category_progress')
+        .upsert(
+          {
+            user_id: userId,
+            category_id: categoryId,
+            stars,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,category_id' }
+        );
+
+      if (error) throw error;
+    }
+  }
 }

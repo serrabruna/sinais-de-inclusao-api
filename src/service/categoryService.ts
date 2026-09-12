@@ -74,4 +74,20 @@ export class CategoryService {
 
         await this.categoryRepository.delete(id);
     }
+
+    static async listAllWithProgress(userId: string) {
+        return await CategoryRepository.findAllWithUserStars(userId);
+    }
+
+    static async saveCategoryStars(userId: string, categoryId: number, stars: number) {
+        if (!stars || stars < 1 || stars > 3) {
+        throw new Error('A quantidade de estrelas deve ser entre 1 e 3.');
+        }
+
+        if (!categoryId || isNaN(categoryId)) {
+        throw new Error('ID de categoria inválido.');
+        }
+
+        return await CategoryRepository.upsertStars(userId, categoryId, stars);
+    }
 }
