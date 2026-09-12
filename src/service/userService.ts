@@ -1,10 +1,12 @@
 import { UserRepository } from '../repository/userRepository.js';
 
-const toLocalDateString = (date: Date): string => {
-    const ano = date.getFullYear();
-    const mes = String(date.getMonth() + 1).padStart(2, '0');
-    const dia = String(date.getDate()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}`;
+const getTodayBrazilStr = (date: Date = new Date()): string => {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(date);
 };
 
 export class UserService {
@@ -15,32 +17,25 @@ export class UserService {
     }
 
     private async buildWeeklyActivity(userId: string): Promise<Array<{ date: string; completed: boolean }>> {
-        const toLocalDateString = (d: Date) => {
-            const ano = d.getFullYear();
-            const mes = String(d.getMonth() + 1).padStart(2, '0');
-            const dia = String(d.getDate()).padStart(2, '0');
-            return `${ano}-${mes}-${dia}`;
-        };
-
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
+        const hojeStr = getTodayBrazilStr();
+        const [ano, mes, dia] = hojeStr.split('-').map(Number);
+        const hoje = new Date(ano!, mes! - 1, dia!);
 
         const diaSemana = hoje.getDay();
         const diasAteSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
 
         const segundaFeira = new Date(hoje);
         segundaFeira.setDate(hoje.getDate() - diasAteSegunda);
-        segundaFeira.setHours(0, 0, 0, 0);
 
-        const inicioSemanaStr = toLocalDateString(segundaFeira);
+        const inicioSemanaStr = getTodayBrazilStr(segundaFeira);
         const datasConcluidas = await this.userRepository.getRecentActivityDates(userId, inicioSemanaStr);
 
         const weeklyActivity: Array<{ date: string; completed: boolean }> = [];
         const ponteiro = new Date(segundaFeira);
 
         for (let i = 0; i < 7; i++) {
-            const dataStr = toLocalDateString(ponteiro);
-            
+            const dataStr = getTodayBrazilStr(ponteiro);
+
             weeklyActivity.push({
                 date: dataStr,
                 completed: datasConcluidas.includes(dataStr)
@@ -115,39 +110,40 @@ export class UserService {
     }
 
     async registerDailyStreak(userId?: string) {
-        if (!userId) {
-            throw new Error('ID do usuário é obrigatório e não pode ser indefinido.');
-        }
+        if (!userId) throw new Error('ID do usuário é obrigatório.');
 
         const user = await this.userRepository.findById(userId);
-        if (!user) {
-            throw new Error('Usuário não encontrado.');
-        }
+        if (!user) throw new Error('Usuário não encontrado.');
 
-        const agora = new Date();
-        const hojeStr = agora.toISOString().split('T')[0]!;
+        
+        const hojeStr = getTodayBrazilStr(); 
 
-        let novoStreak: number = 1;
+        let novoStreak: number = user.streak_count || 1;
         let jaTreinouHoje = false;
 
         if (user.last_streak_date) {
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-
-            const ultimaData = new Date(user.last_streak_date);
-            ultimaData.setHours(0, 0, 0, 0);
-
-            const diffDias = Math.floor((hoje.getTime() - ultimaData.getTime()) / (1000 * 60 * 60 * 24));
-
-            if (diffDias === 0) {
+            
+            if (user.last_streak_date === hojeStr) {
                 jaTreinouHoje = true;
                 novoStreak = user.streak_count || 1;
-            } else if (diffDias === 1) {
-                novoStreak = (user.streak_count || 0) + 1;
+            } else {
+                
+                const d1 = new Date(hojeStr + 'T00:00:00');
+                const d2 = new Date(user.last_streak_date + 'T00:00:00');
+                const diffDias = Math.round((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (diffDias === 1) {
+                    novoStreak = (user.streak_count || 0) + 1;
+                } else if (diffDias > 1) {
+                    novoStreak = 1;
+                }
             }
+        } else {
+            novoStreak = 1;
         }
 
-        if (!jaTreinouHoje || user.last_streak_date !== hojeStr) {
+        
+        if (!jaTreinouHoje) {
             await this.userRepository.updateStreak(userId, novoStreak, hojeStr);
             await this.userRepository.logDailyActivity(userId, hojeStr);
         }
