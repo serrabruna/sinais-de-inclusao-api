@@ -273,11 +273,29 @@
     },
     "/categories": {
       "get": {
-        "summary": "Lista todas as categorias (App)",
+        "summary": "Lista todas as categorias com progresso de estrelas do usuário",
         "tags": ["Categorias"],
         "security": [{ "bearerAuth": [] }],
         "responses": {
-          "200": { "description": "Sucesso" },
+          "200": {
+            "description": "Lista de categorias retornada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer", "example": 1 },
+                      "name": { "type": "string", "example": "Saudações" },
+                      "description": { "type": "string", "example": "Sinais do dia a dia" },
+                      "stars": { "type": "integer", "example": 3, "description": "Estrelas conquistadas pelo usuário nesta categoria (0 a 3)" }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "401": { "description": "Não autorizado." }
         }
       },
@@ -355,6 +373,59 @@
         "responses": {
           "204": { "description": "Categoria deletada com sucesso." },
           "404": { "description": "Categoria não encontrada." }
+        }
+      }
+    },
+    "/categories/{id}/stars": {
+      "post": {
+        "summary": "Salva as estrelas conquistadas pelo usuário na categoria",
+        "tags": ["Categorias", "Gameficação"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da categoria completada",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stars": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3,
+                    "example": 3,
+                    "description": "Quantidade de estrelas (de 1 a 3)"
+                  }
+                },
+                "required": ["stars"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estrelas salvas com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Estrelas salvas com sucesso!" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Quantidade de estrelas inválida." },
+          "401": { "description": "Não autorizado." }
         }
       }
     },

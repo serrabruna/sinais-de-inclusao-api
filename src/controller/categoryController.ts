@@ -60,7 +60,7 @@ export class CategoryController {
         }
     }
 
-    static async listAll(req: Request, res: Response) {
+    async listAll(req: Request, res: Response) {
         try {
             const user = (req as any).user;
             const userId = user?.id;
@@ -76,7 +76,7 @@ export class CategoryController {
         }
     }
 
-    static async saveStars(req: Request, res: Response) {
+    async saveStars(req: Request, res: Response) {
         try {
             const userId = (req as any).user?.id;
             
