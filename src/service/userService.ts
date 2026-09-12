@@ -143,14 +143,28 @@ export class UserService {
         };
     }
 
-    async updateUserName(userId: string, name: string) {
+    async updateUserProfile(userId: string, data: { name?: string; icon?: string }) {
         if (!userId) throw new Error('ID do usuário não fornecido.');
-        if (!name || name.trim().length === 0) {
+
+        if (!data.name && !data.icon) {
+            throw new Error("Informe ao menos 'name' ou 'icon' para atualizar.");
+        }
+
+        if (data.name !== undefined && data.name.trim().length === 0) {
             throw new Error('O nome não pode ser vazio.');
         }
 
-        await this.userRepository.updateName(userId, name.trim());
-        return { message: 'Nome atualizado com sucesso!', name: name.trim() };
+        const updates: { name?: string; icon?: string } = {};
+        if (data.name !== undefined) updates.name = data.name.trim();
+        if (data.icon !== undefined) updates.icon = data.icon.trim();
+
+        await this.userRepository.updateProfile(userId, updates);
+
+        return {
+            message: 'Perfil atualizado com sucesso!',
+            ...(updates.name && { name: updates.name }),
+            ...(updates.icon && { icon: updates.icon }),
+        };
     }
 
     async deleteUserAccount(userId: string) {

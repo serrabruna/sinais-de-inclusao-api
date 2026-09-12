@@ -165,7 +165,7 @@
         }
       },
       "patch": {
-        "summary": "Atualiza o nome do perfil do usuário logado",
+        "summary": "Atualiza dados do perfil (nome e/ou ícone)",
         "tags": ["Usuário"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -175,29 +175,30 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string", "example": "Charlotte Silva" }
-                },
-                "required": ["name"]
+                  "name": { "type": "string", "example": "Charlotte Silva" },
+                  "icon": { "type": "string", "example": "face_4" }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Nome atualizado com sucesso.",
+            "description": "Perfil atualizado com sucesso.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string", "example": "Nome atualizado com sucesso!" },
-                    "name": { "type": "string", "example": "Charlotte Silva" }
+                    "message": { "type": "string", "example": "Perfil atualizado com sucesso!" },
+                    "name": { "type": "string", "example": "Charlotte Silva" },
+                    "icon": { "type": "string", "example": "face_4" }
                   }
                 }
               }
             }
           },
-          "400": { "description": "Nome inválido ou não informado." },
+          "400": { "description": "Dados inválidos ou nenhum campo informado." },
           "401": { "description": "Não autorizado." }
         }
       },

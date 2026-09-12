@@ -81,17 +81,18 @@ export const postStreak = async (req: Request, res: Response) => {
     }
 };
 
-export const updateProfileName = async (req: Request, res: Response) => {
+export const updateProfile = async (req: Request, res: Response) => {
     try {
         const userId = req.userId || (req as any).user?.id;
-        const { name } = req.body;
+        const { name, icon } = req.body;
 
         if (!userId) return res.status(401).json({ error: 'Não autenticado.' });
-        if (!name || typeof name !== 'string' || name.trim().length === 0) {
-            return res.status(400).json({ error: "O campo 'name' é obrigatório e não pode ser vazio." });
+
+        if (!name && !icon) {
+            return res.status(400).json({ error: "É necessário informar ao menos 'name' ou 'icon'." });
         }
 
-        const result = await userService.updateUserName(userId, name);
+        const result = await userService.updateUserProfile(userId, { name, icon });
         return res.status(200).json(result);
     } catch (error: any) {
         return res.status(400).json({ error: error.message });

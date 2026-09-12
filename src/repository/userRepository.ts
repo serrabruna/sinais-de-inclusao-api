@@ -67,13 +67,26 @@ export class UserRepository {
     if (error) throw new Error(`Erro ao atualizar sequência: ${error.message}`);
   }
 
-  async updateName(id: string, name: string): Promise<void> {
-    const { error } = await supabase
-        .from('profiles')
-        .update({ name })
-        .eq('id', id);
+  async updateProfile(id: string, updates: { name?: string; icon?: string }): Promise<void> {
+      const dataToUpdate: Record<string, any> = {};
 
-    if (error) throw new Error(`Erro ao atualizar nome: ${error.message}`);
+      if (updates.name !== undefined) {
+          dataToUpdate.name = updates.name.trim();
+      }
+      if (updates.icon !== undefined) {
+          dataToUpdate.avatar_icon = updates.icon.trim();
+      }
+
+      if (Object.keys(dataToUpdate).length === 0) return;
+
+      const { error } = await supabase
+          .from('profiles')
+          .update(dataToUpdate)
+          .eq('id', id);
+
+      if (error) {
+          throw new Error(`Erro ao atualizar perfil: ${error.message}`);
+      }
   }
 
   async deleteAccount(id: string): Promise<void> {

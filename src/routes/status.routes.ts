@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { deleteAccount, getProfile, handleAnswerResponse, postStreak, updateProfileName } from '../controller/userController.js';
+import { deleteAccount, getProfile, handleAnswerResponse, postStreak, updateProfile } from '../controller/userController.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { login, register } from '../controller/authController.js';
 import { SignController } from '../controller/signController.js';
@@ -47,7 +47,7 @@ routes.delete('/signs/:id', authMiddleware, adminMiddleware, signController.hand
 routes.post('/answer', authMiddleware, handleAnswerResponse);
 
 routes.get('/user/profile', authMiddleware, getProfile);
-routes.patch('/user/profile', authMiddleware, updateProfileName);
+routes.patch('/user/profile', authMiddleware, updateProfile);
 routes.delete('/user/profile', authMiddleware, deleteAccount);
 routes.post('/user/streak', authMiddleware, postStreak);
 
